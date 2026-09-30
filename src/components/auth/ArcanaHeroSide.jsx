@@ -177,9 +177,6 @@ export const ArcanaHeroSide = () => {
 
       {/* Middle Brand Info and Description */}
       <div className="relative z-10 space-y-2.5 my-2">
-        <span className="text-amber-400 text-xs sm:text-sm font-semibold tracking-wider uppercase">
-          Arcana Food Operations
-        </span>
 
         <h2 className="text-white text-2xl sm:text-3xl font-semibold tracking-tight">
           Smart Event Meal Management
@@ -204,11 +201,6 @@ export const ArcanaHeroSide = () => {
         }}
       >
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
-              5-Meal Schedule Active
-            </span>
-          </div>
 
           <h3 className="text-white font-semibold text-sm sm:text-base leading-snug max-w-[280px]">
             Live Counter Verification &amp; QR Tokens

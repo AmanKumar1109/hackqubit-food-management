@@ -43,6 +43,29 @@ import { CANONICAL_KEYS } from '../../utils/teamSchema';
 // Required operations security PIN specified by administrator
 const REQUIRED_SECURITY_PIN = '923473';
 
+/**
+ * Extracts a numeric team index from Team Name or WiFi ID for natural numeric ordering.
+ * Matches: 'Team 1', 'Team 2', 'Team10', 'team_5', or any number in the name/wifi.
+ */
+const extractTeamNumber = (p) => {
+  const name = String(p['Team Name'] || p.teamName || '');
+  const wifi = String(p['WiFi ID'] || p.wifiId || '');
+
+  // 1. Try finding number after word 'team' (e.g. 'Team 1', 'Team-02', 'TEAM 10')
+  const nameMatch = name.match(/team\s*[-_]?\s*(\d+)/i);
+  if (nameMatch && nameMatch[1]) return parseInt(nameMatch[1], 10);
+
+  // 2. Try WiFi ID (e.g. 'Team1', 'Team 15')
+  const wifiMatch = wifi.match(/team\s*[-_]?\s*(\d+)/i) || wifi.match(/\d+/);
+  if (wifiMatch) return parseInt(wifiMatch[1] || wifiMatch[0], 10);
+
+  // 3. Any standalone number in team name
+  const anyNum = name.match(/\b\d+\b/) || name.match(/\d+/);
+  if (anyNum) return parseInt(anyNum[0], 10);
+
+  return null;
+};
+
 export const AllParticipantsManager = ({ onExit }) => {
   // Security PIN state
   const [isUnlocked, setIsUnlocked] = useState(
@@ -63,7 +86,7 @@ export const AllParticipantsManager = ({ onExit }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [wifiFilter, setWifiFilter] = useState('all'); // 'all' | 'configured' | 'missing'
   const [utrFilter, setUtrFilter] = useState('all'); // 'all' | 'ok' | 'wrong'
-  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'teamName' | 'teamSize'
+  const [sortBy, setSortBy] = useState('teamNumber'); // 'teamNumber' | 'teamNumberDesc' | 'newest' | 'oldest' | 'teamName' | 'teamSize'
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
@@ -412,10 +435,45 @@ export const AllParticipantsManager = ({ onExit }) => {
         return true;
       })
       .sort((a, b) => {
+        if (sortBy === 'teamNumber') {
+          const numA = extractTeamNumber(a);
+          const numB = extractTeamNumber(b);
+
+          if (numA !== null && numB !== null) {
+            if (numA !== numB) return numA - numB;
+          } else if (numA !== null) {
+            return -1; // Numbered teams come first
+          } else if (numB !== null) {
+            return 1;
+          }
+
+          // Fallback to natural alphanumeric sort on team name
+          const nameA = String(a['Team Name'] || a.teamName || '');
+          const nameB = String(b['Team Name'] || b.teamName || '');
+          return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
+        if (sortBy === 'teamNumberDesc') {
+          const numA = extractTeamNumber(a);
+          const numB = extractTeamNumber(b);
+
+          if (numA !== null && numB !== null) {
+            if (numA !== numB) return numB - numA;
+          } else if (numA !== null) {
+            return -1;
+          } else if (numB !== null) {
+            return 1;
+          }
+
+          const nameA = String(a['Team Name'] || a.teamName || '');
+          const nameB = String(b['Team Name'] || b.teamName || '');
+          return nameB.localeCompare(nameA, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
         if (sortBy === 'teamName') {
-          const nameA = String(a['Team Name'] || a.teamName || '').toLowerCase();
-          const nameB = String(b['Team Name'] || b.teamName || '').toLowerCase();
-          return nameA.localeCompare(nameB);
+          const nameA = String(a['Team Name'] || a.teamName || '');
+          const nameB = String(b['Team Name'] || b.teamName || '');
+          return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
         }
         if (sortBy === 'teamSize') {
           const sizeA = Number(a['Team Size'] || a.teamSize || 1);
@@ -759,11 +817,13 @@ export const AllParticipantsManager = ({ onExit }) => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full bg-[#F4F5F8] border border-neutral-200/80 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:bg-white focus:outline-none focus:border-neutral-900 cursor-pointer"
+              className="w-full bg-[#F4F5F8] border border-neutral-200/80 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:bg-white focus:outline-none focus:border-neutral-900 cursor-pointer font-medium"
             >
+              <option value="teamNumber">Sort: Team Number (Team 1, Team 2…)</option>
+              <option value="teamNumberDesc">Sort: Team Number (High to Low)</option>
+              <option value="teamName">Sort: Team Name (A-Z)</option>
               <option value="newest">Sort: Newest First</option>
               <option value="oldest">Sort: Oldest First</option>
-              <option value="teamName">Sort: Team Name (A-Z)</option>
               <option value="teamSize">Sort: Team Size (Largest)</option>
             </select>
           </div>

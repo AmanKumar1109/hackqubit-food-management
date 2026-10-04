@@ -161,7 +161,11 @@ export const TeamMealManager = () => {
           const tn = d.data()['Team Name'] || d.data().teamName;
           if (tn) names.add(tn);
         });
-        setAllTeams([...names].sort());
+        setAllTeams(
+          [...names].sort((a, b) =>
+            a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+          )
+        );
       } catch {
         /* optional autocomplete */
       }

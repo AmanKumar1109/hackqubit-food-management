@@ -429,7 +429,7 @@ export const TeamMealManager = () => {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-semibold mb-2">
               <Users size={14} />
-              <span>5-Meal Team Food Management</span>
+              <span>Hackathon Deck</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">
               Search Team &amp; Manage 5 Meals

@@ -67,7 +67,7 @@ export const BrandLogo = ({
             isLarge ? 'text-lg' : 'text-sm sm:text-base'
           } ${isDarkText ? 'text-neutral-900' : 'text-white'}`}
         >
-          Arcana <span className="font-semibold text-neutral-500">FoodOps</span>
+          Arcana <span className="font-semibold text-neutral-500">Hackathon Deck</span>
         </span>
       )}
     </div>

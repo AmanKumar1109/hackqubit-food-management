@@ -42,7 +42,7 @@ export const AuthLayout = ({ children }) => {
           in collaboration with HackQubit 2.0
         </p>
         <p className="text-[11px] text-neutral-500 mt-1">
-          &copy; 2026 Arcana FoodOps &bull; Hackathon Meal Management System
+          &copy; 2026 Arcana Hackathon Deck &bull; HackQubit 2.0
         </p>
       </footer>
     </main>

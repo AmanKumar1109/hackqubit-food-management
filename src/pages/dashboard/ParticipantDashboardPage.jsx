@@ -920,7 +920,7 @@ export const ParticipantDashboardPage = () => {
         <p className="font-cinzel text-xs sm:text-sm font-bold tracking-widest uppercase text-neutral-800">
           in collaboration with HackQubit 2.0
         </p>
-        <p>&copy; 2026 Arcana &bull; Hackathon Student Food Pass &amp; Dining Operations.</p>
+        <p>&copy; 2026 Arcana Hackathon Deck &bull; Student Pass &amp; Dining Portal.</p>
       </footer>
     </div>
   );

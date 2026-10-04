@@ -186,7 +186,7 @@ export const ArcanaHeroSide = () => {
         </div>
 
         <h2 className="text-white text-2xl sm:text-3xl font-semibold tracking-tight">
-          Smart Event Meal Management
+          Smart Event Hackathon Deck
         </h2>
 
         <p className="text-neutral-300 text-xs sm:text-[13px] leading-relaxed max-w-sm">

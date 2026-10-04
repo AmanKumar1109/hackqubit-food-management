@@ -117,10 +117,10 @@ export const LoginForm = () => {
       {/* Main Title - Sign in */}
       <div className="gsap-form-item mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
-          Sign in to Meal Operations
+          Sign in to Hackathon Deck
         </h1>
         <p className="text-xs text-neutral-500 mt-0.5">
-          Access your hackathon food pass, 5-meal tokens &amp; team dining status
+          Access your hackathon credentials, passes &amp; team portal
         </p>
       </div>
 

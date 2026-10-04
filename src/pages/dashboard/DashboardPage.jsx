@@ -142,11 +142,11 @@ export const DashboardPage = () => {
             <div className="lg:col-span-8 space-y-3.5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-neutral-300">
                 <Sparkles size={13} className="text-amber-400" />
-                <span>Live Event Food &bull; Dining Desk Operations Active</span>
+                <span>Live Event &bull; Hackathon Deck Operations Active</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
-                Hackathon Meal Management System
+                Hackathon Deck
               </h1>
 
               <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed max-w-xl">
@@ -176,7 +176,7 @@ export const DashboardPage = () => {
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
-                    Dining Desk
+                    Hackathon Deck
                   </span>
                   <span className="text-[10px] text-neutral-400">Live Counters</span>
                 </div>
@@ -440,7 +440,7 @@ export const DashboardPage = () => {
         <p className="font-cinzel text-xs sm:text-sm font-bold tracking-widest uppercase text-neutral-800">
           in collaboration with HackQubit 2.0
         </p>
-        <p>&copy; 2026 Arcana FoodOps &bull; Hackathon &amp; Event Meal Management Platform.</p>
+        <p>&copy; 2026 Arcana Hackathon Deck &bull; Event Operations Platform.</p>
       </footer>
     </div>
   );

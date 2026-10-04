@@ -23,6 +23,8 @@ import { useAuth } from '../../hooks/useAuth';
 import BrandLogo from '../../components/common/BrandLogo';
 import ExcelDataUploader from '../../components/hackathon/ExcelDataUploader';
 import TeamMealManager from '../../components/hackathon/TeamMealManager';
+import AllParticipantsManager from '../../components/hackathon/AllParticipantsManager';
+import AdminPinGuard from '../../components/common/AdminPinGuard';
 import { MEAL_SLOTS } from '../../utils/participantParser';
 
 export const DashboardPage = () => {
@@ -72,20 +74,17 @@ export const DashboardPage = () => {
       {/* Top Navigation Bar */}
       <header className="dash-anim border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
-          {/* Brand Logo */}
-          <div className="flex items-center gap-3">
+          {/* Brand Logo & Collaboration Badge */}
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-nowrap shrink-0">
             <BrandLogo size="default" showText={true} theme="dark" />
-            <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">
-              Operations Lead Console
-            </span>
-          </div>
-
-          {/* Quick Counter Info */}
-          <div className="hidden md:flex items-center gap-2 text-xs text-neutral-500 bg-neutral-100/80 px-3.5 py-1.5 rounded-full border border-neutral-200">
-            <CalendarDays size={14} className="text-neutral-700" />
-            <span>
-              Multi-Day Hackathon &bull; <strong>5 Meal Distribution Slots</strong>
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/90 text-amber-900 shadow-2xs whitespace-nowrap shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="font-cinzel text-[10px] sm:text-[11px] font-bold tracking-wider uppercase whitespace-nowrap">
+                <span className="hidden sm:inline">in collaboration with </span>
+                <span className="sm:hidden">collab with </span>
+                HackQubit 2.0
+              </span>
+            </div>
           </div>
 
           {/* Right User & Actions */}
@@ -284,6 +283,18 @@ export const DashboardPage = () => {
             </button>
 
             <button
+              onClick={() => setActiveTab('participants')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'participants'
+                  ? 'bg-[#151619] text-white shadow-xs'
+                  : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200/80 hover:bg-neutral-50'
+              }`}
+            >
+              <Users size={15} />
+              <span>All Participants (Edit &amp; Directory)</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('excel')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'excel'
@@ -320,10 +331,31 @@ export const DashboardPage = () => {
           </div>
         )}
 
-        {/* Tab 2: Excel Sheet Upload & Firestore Sync */}
+        {/* Tab 2: All Participants Directory & Real-Time Editor (PIN Protected) */}
+        {activeTab === 'participants' && (
+          <div className="space-y-6">
+            <AdminPinGuard
+              title="All Participants Directory &amp; Editor"
+              description="Enter the 6-digit security PIN to view and edit participant records."
+              badgeText="Restricted Participants Console"
+              onExit={() => setActiveTab('team')}
+            >
+              <AllParticipantsManager onExit={() => setActiveTab('team')} />
+            </AdminPinGuard>
+          </div>
+        )}
+
+        {/* Tab 3: Excel Sheet Upload & Firestore Sync (PIN Protected) */}
         {activeTab === 'excel' && (
           <div className="space-y-6">
-            <ExcelDataUploader />
+            <AdminPinGuard
+              title="Excel Participant &amp; Team Sync"
+              description="Enter the 6-digit security PIN to upload spreadsheets and synchronize teams with Firestore."
+              badgeText="Restricted Excel Sync Console"
+              onExit={() => setActiveTab('team')}
+            >
+              <ExcelDataUploader onExit={() => setActiveTab('team')} />
+            </AdminPinGuard>
           </div>
         )}
 
@@ -404,7 +436,10 @@ export const DashboardPage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="dash-anim border-t border-neutral-200/80 bg-white py-6 mt-12 text-center text-xs text-neutral-500">
+      <footer className="dash-anim border-t border-neutral-200/80 bg-white py-6 mt-12 text-center text-xs text-neutral-500 space-y-1.5">
+        <p className="font-cinzel text-xs sm:text-sm font-bold tracking-widest uppercase text-neutral-800">
+          in collaboration with HackQubit 2.0
+        </p>
         <p>&copy; 2026 Arcana FoodOps &bull; Hackathon &amp; Event Meal Management Platform.</p>
       </footer>
     </div>

@@ -17,7 +17,9 @@ import {
   Info,
   ScanLine,
   Phone,
-  Sparkles
+  Sparkles,
+  Wifi,
+  Key
 } from 'lucide-react';
 import gsap from 'gsap';
 import {
@@ -25,6 +27,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   doc,
   updateDoc
 } from 'firebase/firestore';
@@ -178,9 +181,9 @@ export const TeamMealManager = () => {
     return () => ctx.revert();
   }, [teamData]);
 
-  /* ── Universal Search (by Team Name, Special ID, Leader Email or Phone) ── */
+  /* ── Universal Search (by Special ID, Team Name, Leader Email or Phone) ── */
   const searchTeam = async (nameOverride) => {
-    const rawSearch = (nameOverride ?? teamSearch).trim();
+    let rawSearch = (nameOverride ?? teamSearch).trim();
     if (!rawSearch) return;
 
     setLoading(true);
@@ -194,31 +197,50 @@ export const TeamMealManager = () => {
       let rawDocs = [];
       const participantsRef = collection(db, PARTICIPANTS_COLLECTION);
 
-      // 1. Try targeted queries across all identifier fields
-      const queryFields = [
-        'Special ID',
-        'specialId',
-        'Team Name',
-        'teamName',
-        'Leader Email',
-        'Leader Contact',
-        'Leader Phone',
-        'Email',
-        'email',
-        'Phone',
-        'phone'
-      ];
+      // 0. Fast direct lookup by Document ID (which is the 16-digit Special ID)
+      try {
+        const directDocSnap = await getDoc(doc(participantsRef, rawSearch));
+        if (directDocSnap.exists()) {
+          rawDocs.push({ _docId: directDocSnap.id, ...directDocSnap.data() });
+        } else if (rawSearch.includes('_')) {
+          // If member suffix like HQ..._M2, fetch parent team document
+          const baseDocId = rawSearch.split('_')[0];
+          const baseSnap = await getDoc(doc(participantsRef, baseDocId));
+          if (baseSnap.exists()) {
+            rawDocs.push({ _docId: baseSnap.id, ...baseSnap.data() });
+          }
+        }
+      } catch (err) {
+        console.warn('Direct doc lookup miss:', err);
+      }
 
-      for (const field of queryFields) {
-        const q = query(participantsRef, where(field, '==', rawSearch));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          snap.forEach((d) => rawDocs.push({ _docId: d.id, ...d.data() }));
-          break;
+      // 1. Try targeted queries across all identifier fields if not yet found
+      if (rawDocs.length === 0) {
+        const queryFields = [
+          'Special ID',
+          'specialId',
+          'Team Name',
+          'teamName',
+          'Leader Email',
+          'Leader Contact',
+          'Leader Phone',
+          'Email',
+          'email',
+          'Phone',
+          'phone'
+        ];
+
+        for (const field of queryFields) {
+          const q = query(participantsRef, where(field, '==', rawSearch));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            snap.forEach((d) => rawDocs.push({ _docId: d.id, ...d.data() }));
+            break;
+          }
         }
       }
 
-      // 2. If not found by exact query, scan all docs (handles case-insensitive & partials)
+      // 2. If still not found by exact query, scan all docs (handles case-insensitive & partials)
       if (rawDocs.length === 0) {
         const allSnap = await getDocs(participantsRef);
         const searchLower = rawSearch.toLowerCase();
@@ -268,10 +290,26 @@ export const TeamMealManager = () => {
         setDataMode('multi-doc');
       }
 
-      const displayTeamName = rawDocs[0]['Team Name'] || rawDocs[0].teamName || rawSearch;
-      setTeamData({ teamName: displayTeamName, members: allMembers, rawDocCount: rawDocs.length });
+      const primaryDoc = rawDocs[0] || {};
+      const displayTeamName = primaryDoc['Team Name'] || primaryDoc.teamName || rawSearch;
+      const specialId = primaryDoc['Special ID'] || primaryDoc.specialId || primaryDoc._docId;
+      const wifiId = primaryDoc['WiFi ID'] || primaryDoc.wifiId || primaryDoc.wifi?.id;
+      const wifiPassword = primaryDoc['WiFi Password'] || primaryDoc.wifiPassword || primaryDoc.wifi?.password;
+      const leaderName = primaryDoc['Leader Name'] || primaryDoc.leader?.name || primaryDoc['Full Name'];
+      const college = primaryDoc['Leader College'] || primaryDoc['College Name'] || primaryDoc.leader?.college;
+
+      setTeamData({
+        teamName: displayTeamName,
+        members: allMembers,
+        rawDocCount: rawDocs.length,
+        specialId,
+        wifiId,
+        wifiPassword,
+        leaderName,
+        college
+      });
       setTeamSearch(displayTeamName);
-      setSuccessMsg(`Loaded Team "${displayTeamName}" with ${allMembers.length} members`);
+      setSuccessMsg(`✓ Loaded Team "${displayTeamName}" (${allMembers.length} members)`);
       setTimeout(() => setSuccessMsg(''), 3500);
     } catch (err) {
       setError('Firestore query failed. Check Firebase configuration and network connection.');
@@ -279,6 +317,29 @@ export const TeamMealManager = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  /* ── Scan Handler: Auto cleans URL/JSON and triggers lookup ── */
+  const handleQrScanSuccess = (scannedText) => {
+    setShowQrScanner(false);
+    let cleanCode = String(scannedText || '').trim();
+    if (!cleanCode) return;
+
+    // 1. If scanned text is JSON
+    try {
+      const parsed = JSON.parse(cleanCode);
+      if (parsed.specialId || parsed.id || parsed['Special ID']) {
+        cleanCode = parsed.specialId || parsed.id || parsed['Special ID'];
+      }
+    } catch {}
+
+    // 2. If scanned text is a URL, extract final pathname token
+    if (cleanCode.includes('/')) {
+      cleanCode = cleanCode.split('/').filter(Boolean).pop();
+    }
+
+    setTeamSearch(cleanCode);
+    searchTeam(cleanCode);
   };
 
   /* ── Toggle meal for one member ───────────────────────────── */
@@ -362,15 +423,6 @@ export const TeamMealManager = () => {
 
   return (
     <div ref={containerRef} className="space-y-6">
-      {/* QR Scanner Modal */}
-      <QrScannerModal
-        isOpen={showQrScanner}
-        onClose={() => setShowQrScanner(false)}
-        onScanSuccess={(decoded) => {
-          searchTeam(decoded);
-        }}
-      />
-
       {/* ── Search & QR Scan Card ─────────────────────────────────────── */}
       <div className="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-neutral-100">
@@ -499,10 +551,27 @@ export const TeamMealManager = () => {
                 <Users size={20} className="text-white" />
               </div>
               <div>
-                <p className="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">
-                  Team
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[11px] text-neutral-400 uppercase tracking-wider font-semibold">
+                    Team
+                  </p>
+                  {teamData.specialId && (
+                    <span className="inline-flex items-center gap-1 font-mono text-[10px] text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                      <Key size={10} />
+                      {teamData.specialId}
+                    </span>
+                  )}
+                </div>
                 <h3 className="text-lg font-bold text-white">{teamData.teamName}</h3>
+                {teamData.wifiId && (
+                  <div className="flex items-center gap-1 text-[11px] text-emerald-400 mt-0.5">
+                    <Wifi size={11} />
+                    <span>WiFi: <strong>{teamData.wifiId}</strong></span>
+                    {teamData.wifiPassword && (
+                      <span className="text-neutral-400">({teamData.wifiPassword})</span>
+                    )}
+                  </div>
+                )}
               </div>
               {dataMode === 'embedded' && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/25">
@@ -715,6 +784,13 @@ export const TeamMealManager = () => {
           </p>
         </div>
       )}
+
+      {/* QR Scanner Modal for Food Counter Desk */}
+      <QrScannerModal
+        isOpen={showQrScanner}
+        onClose={() => setShowQrScanner(false)}
+        onScanSuccess={handleQrScanSuccess}
+      />
     </div>
   );
 };

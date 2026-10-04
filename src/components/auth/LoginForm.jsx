@@ -7,7 +7,8 @@ import {
   ShieldCheck,
   GraduationCap,
   Phone,
-  Info
+  Info,
+  Sparkles
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useAuth } from '../../hooks/useAuth';
@@ -102,9 +103,15 @@ export const LoginForm = () => {
       ref={formContainerRef}
       className="w-full max-w-[440px] mx-auto flex flex-col justify-center py-4 px-4 sm:px-6"
     >
-      {/* Top Logo - Arcana */}
-      <div className="gsap-form-item flex justify-start mb-4 sm:mb-6">
+      {/* Top Logo & HackQubit 2.0 Collaboration Badge */}
+      <div className="gsap-form-item flex flex-col items-start gap-2 mb-5 sm:mb-6">
         <BrandLogo size="default" showText={true} theme="dark" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50/95 text-amber-900 border border-amber-200/90 shadow-2xs whitespace-nowrap">
+          <Sparkles size={12} className="text-amber-600 shrink-0" />
+          <span className="font-cinzel text-[10px] sm:text-[11px] font-bold tracking-wider uppercase whitespace-nowrap">
+            in collaboration with HackQubit 2.0
+          </span>
+        </div>
       </div>
 
       {/* Main Title - Sign in */}

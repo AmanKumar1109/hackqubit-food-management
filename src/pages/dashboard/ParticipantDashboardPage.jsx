@@ -15,7 +15,12 @@ import {
   RefreshCw,
   AlertCircle,
   Phone,
-  GraduationCap
+  GraduationCap,
+  Wifi,
+  Mail,
+  CreditCard,
+  ExternalLink,
+  Key
 } from 'lucide-react';
 import gsap from 'gsap';
 import { collection, query, where, getDocs, doc, onSnapshot } from 'firebase/firestore';
@@ -37,11 +42,19 @@ export const ParticipantDashboardPage = () => {
   const pageRef = useRef(null);
 
   const [copied, setCopied] = useState(false);
+  const [copiedLabel, setCopiedLabel] = useState(null);
   const [teamMembers, setTeamMembers] = useState(user?.teammates || null);
   const [rawTeamDoc, setRawTeamDoc] = useState(null);
   const [fetchingTeam, setFetchingTeam] = useState(false);
   const [teamError, setTeamError] = useState('');
   const [lastRefreshed, setLastRefreshed] = useState(null);
+
+  const copyText = (text, label) => {
+    if (!text) return;
+    navigator.clipboard.writeText(String(text).trim());
+    setCopiedLabel(label);
+    setTimeout(() => setCopiedLabel(null), 2000);
+  };
 
   /* ── GSAP entrance ─────────────────────────────────────────── */
   useEffect(() => {
@@ -237,6 +250,60 @@ export const ParticipantDashboardPage = () => {
     myMemberData?.foodPreference ||
     'Veg';
 
+  const displayWifiId =
+    rawTeamDoc?.['WiFi ID'] ||
+    rawTeamDoc?.wifiId ||
+    rawTeamDoc?.wifi?.id ||
+    '';
+
+  const displayWifiPass =
+    rawTeamDoc?.['WiFi Password'] ||
+    rawTeamDoc?.wifiPassword ||
+    rawTeamDoc?.wifi?.password ||
+    '';
+
+  const displayLeaderName =
+    rawTeamDoc?.['Leader Name'] ||
+    rawTeamDoc?.leader?.name ||
+    rawTeamDoc?.['Full Name'] ||
+    user?.leader?.name ||
+    teamMembers?.[0]?.name ||
+    'Team Leader';
+
+  const displayLeaderEmail =
+    rawTeamDoc?.['Leader Email'] ||
+    rawTeamDoc?.leader?.email ||
+    rawTeamDoc?.Email ||
+    user?.email ||
+    '—';
+
+  const displayLeaderPhone =
+    rawTeamDoc?.['Leader Contact'] ||
+    rawTeamDoc?.['Leader Phone'] ||
+    rawTeamDoc?.leader?.contact ||
+    rawTeamDoc?.Phone ||
+    user?.leaderPhone ||
+    '—';
+
+  const displayTxnId =
+    rawTeamDoc?.['Transaction ID'] ||
+    rawTeamDoc?.registration?.transactionId ||
+    '—';
+
+  const displayPaymentLink =
+    rawTeamDoc?.['Payment Screenshot Link'] ||
+    rawTeamDoc?.registration?.paymentScreenshotLink;
+
+  const displayTimestamp =
+    rawTeamDoc?.TimeStamp ||
+    rawTeamDoc?.registration?.timestamp;
+
+  const displayTeamSize =
+    rawTeamDoc?.['Team Size'] ||
+    rawTeamDoc?.teamSize ||
+    teamMembers?.length ||
+    4;
+
   /* Team-level stats */
   const teamStats = teamMembers
     ? (() => {
@@ -260,11 +327,16 @@ export const ParticipantDashboardPage = () => {
       {/* ── Navbar ──────────────────────────────────────────────── */}
       <header className="participant-anim border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-nowrap shrink-0">
             <BrandLogo size="default" showText={true} theme="dark" />
-            <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">
-              5-Meal Food Pass (Read-Only)
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/90 text-amber-900 shadow-2xs whitespace-nowrap shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="font-cinzel text-[10px] sm:text-[11px] font-bold tracking-wider uppercase whitespace-nowrap">
+                <span className="hidden sm:inline">in collaboration with </span>
+                <span className="sm:hidden">collab with </span>
+                HackQubit 2.0
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2.5 pl-2 sm:pl-3">
@@ -354,6 +426,19 @@ export const ParticipantDashboardPage = () => {
                     Team <strong>{displayTeamName}</strong>
                   </span>
                 </div>
+
+                {displayWifiId && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-xs text-white mt-2 font-mono">
+                    <Wifi size={13} className="text-emerald-400 shrink-0" />
+                    <span>WiFi: <strong>{displayWifiId}</strong></span>
+                    {displayWifiPass && (
+                      <>
+                        <span className="text-neutral-500">|</span>
+                        <span>Pass: <strong className="text-amber-300">{displayWifiPass}</strong></span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Special ID */}
@@ -424,6 +509,148 @@ export const ParticipantDashboardPage = () => {
             <p className="text-amber-800 text-[11px] leading-relaxed">
               Meal tokens are verified by <strong>Hackathon Management Staff</strong> at dining counters. Statuses update in real time.
             </p>
+          </div>
+        </div>
+
+        {/* ── Team Registration & Network Credentials Dossier ── */}
+        <div className="participant-anim space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 flex items-center gap-2">
+                <Users size={20} className="text-neutral-900" />
+                <span>Team Registration &amp; Credentials</span>
+              </h2>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Official Google Form submission details, leader info, and venue WiFi access
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-white border border-neutral-200 text-neutral-700 shadow-xs">
+              Team Size: <strong>{displayTeamSize} Members</strong>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Card 1: WiFi Access */}
+            <div className="bg-white rounded-3xl p-5 border border-neutral-200/80 shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+                <span className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                  <Wifi size={15} className="text-emerald-600" />
+                  <span>Venue WiFi Access</span>
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Active
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs p-2 rounded-xl bg-neutral-50 border border-neutral-100">
+                  <span className="text-neutral-500">SSID / WiFi ID:</span>
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-neutral-900">
+                    <span>{displayWifiId || 'HQ_VENUE_WIFI'}</span>
+                    <button
+                      onClick={() => copyText(displayWifiId || 'HQ_VENUE_WIFI', 'wifiId')}
+                      className="p-1 hover:text-emerald-600 text-neutral-400 transition-colors cursor-pointer"
+                      title="Copy WiFi SSID"
+                    >
+                      {copiedLabel === 'wifiId' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs p-2 rounded-xl bg-neutral-50 border border-neutral-100">
+                  <span className="text-neutral-500">Password:</span>
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-neutral-900">
+                    <span>{displayWifiPass || 'hackqubit@2026'}</span>
+                    <button
+                      onClick={() => copyText(displayWifiPass || 'hackqubit@2026', 'wifiPass')}
+                      className="p-1 hover:text-emerald-600 text-neutral-400 transition-colors cursor-pointer"
+                      title="Copy WiFi Password"
+                    >
+                      {copiedLabel === 'wifiPass' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Team Leader Profile */}
+            <div className="bg-white rounded-3xl p-5 border border-neutral-200/80 shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+                <span className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                  <GraduationCap size={15} className="text-amber-600" />
+                  <span>Team Leader Details</span>
+                </span>
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  Leader
+                </span>
+              </div>
+
+              <div className="space-y-1.5 text-xs">
+                <p className="font-bold text-neutral-900 text-sm">{displayLeaderName}</p>
+                <div className="flex items-center gap-1.5 text-neutral-600">
+                  <Phone size={12} className="text-neutral-400 shrink-0" />
+                  <span className="font-mono">{displayLeaderPhone}</span>
+                </div>
+                {displayLeaderEmail && displayLeaderEmail !== '—' && (
+                  <div className="flex items-center gap-1.5 text-neutral-600 truncate">
+                    <Mail size={12} className="text-neutral-400 shrink-0" />
+                    <span className="truncate">{displayLeaderEmail}</span>
+                  </div>
+                )}
+                <p className="text-[11px] text-neutral-500 pt-0.5 truncate">
+                  {displayCollege} {displayCourse ? `• ${displayCourse}` : ''}
+                </p>
+              </div>
+            </div>
+
+            {/* Card 3: Payment & Verification */}
+            <div className="bg-white rounded-3xl p-5 border border-neutral-200/80 shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+                <span className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                  <CreditCard size={15} className="text-blue-600" />
+                  <span>Payment &amp; Registration</span>
+                </span>
+                <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                  Verified
+                </span>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                {displayTimestamp && (
+                  <div className="flex items-center justify-between text-neutral-600">
+                    <span className="text-neutral-400 text-[11px]">Submitted:</span>
+                    <span className="font-medium text-[11px] truncate max-w-[160px]">{displayTimestamp}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-neutral-50 border border-neutral-100">
+                  <span className="text-neutral-500 text-[11px]">UTR / Txn ID:</span>
+                  <div className="flex items-center gap-1 font-mono font-bold text-neutral-900 text-[11px]">
+                    <span className="truncate max-w-[110px]">{displayTxnId}</span>
+                    {displayTxnId !== '—' && (
+                      <button
+                        onClick={() => copyText(displayTxnId, 'txnId')}
+                        className="p-0.5 hover:text-blue-600 text-neutral-400 transition-colors cursor-pointer"
+                        title="Copy Transaction ID"
+                      >
+                        {copiedLabel === 'txnId' ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {displayPaymentLink && (
+                  <a
+                    href={displayPaymentLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[11px] font-semibold transition-colors"
+                  >
+                    <span>View Payment Proof</span>
+                    <ExternalLink size={11} />
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -689,7 +916,10 @@ export const ParticipantDashboardPage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="participant-anim border-t border-neutral-200/80 bg-white py-6 mt-12 text-center text-xs text-neutral-500">
+      <footer className="participant-anim border-t border-neutral-200/80 bg-white py-6 mt-12 text-center text-xs text-neutral-500 space-y-1.5">
+        <p className="font-cinzel text-xs sm:text-sm font-bold tracking-widest uppercase text-neutral-800">
+          in collaboration with HackQubit 2.0
+        </p>
         <p>&copy; 2026 Arcana &bull; Hackathon Student Food Pass &amp; Dining Operations.</p>
       </footer>
     </div>

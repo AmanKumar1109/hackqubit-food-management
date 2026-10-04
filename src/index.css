@@ -4,6 +4,7 @@
   :root {
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-cinzel: 'Cinzel', serif;
   }
 
   * {
@@ -54,4 +55,8 @@
 
 .animate-pulse-glow {
   animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
 }

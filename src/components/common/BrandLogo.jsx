@@ -1,17 +1,35 @@
 import React from 'react';
 
 /**
- * Brand Logo component rendering the signature Arcana faceted geometric "A" and brand name
+ * Brand Logo component rendering the signature Arcana faceted geometric "A" and brand name.
+ * Supports both modern 'horizontal' (default) and stacked 'vertical' layouts.
  */
-export const BrandLogo = ({ size = 'default', showText = true, className = '', theme = 'dark' }) => {
+export const BrandLogo = ({
+  size = 'default',
+  showText = true,
+  className = '',
+  theme = 'dark',
+  layout = 'horizontal'
+}) => {
   const isLarge = size === 'large';
   const isDarkText = theme === 'dark';
+  const isVertical = layout === 'vertical';
+
+  const iconSizeClass = isLarge
+    ? (isVertical ? 'w-16 h-16' : 'w-10 h-10')
+    : (isVertical ? 'w-9 h-9' : 'w-7 h-7');
 
   return (
-    <div className={`flex flex-col items-center select-none ${className}`}>
+    <div
+      className={`select-none shrink-0 ${
+        isVertical
+          ? 'flex flex-col items-center text-center'
+          : 'flex items-center gap-2.5'
+      } ${className}`}
+    >
       {/* Faceted 3D Geometric "A" Icon */}
       <svg
-        className={isLarge ? 'w-16 h-16' : 'w-9 h-9'}
+        className={`${iconSizeClass} shrink-0`}
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -43,8 +61,10 @@ export const BrandLogo = ({ size = 'default', showText = true, className = '', t
 
       {showText && (
         <span
-          className={`font-bold tracking-tight mt-1 ${
-            isLarge ? 'text-lg' : 'text-sm'
+          className={`font-bold tracking-tight whitespace-nowrap ${
+            isVertical ? 'mt-1' : ''
+          } ${
+            isLarge ? 'text-lg' : 'text-sm sm:text-base'
           } ${isDarkText ? 'text-neutral-900' : 'text-white'}`}
         >
           Arcana <span className="font-semibold text-neutral-500">FoodOps</span>

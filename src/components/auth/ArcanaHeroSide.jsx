@@ -178,6 +178,13 @@ export const ArcanaHeroSide = () => {
       {/* Middle Brand Info and Description */}
       <div className="relative z-10 space-y-2.5 my-2">
 
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 w-fit backdrop-blur-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <span className="font-cinzel text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-amber-200">
+            in collaboration with HackQubit 2.0
+          </span>
+        </div>
+
         <h2 className="text-white text-2xl sm:text-3xl font-semibold tracking-tight">
           Smart Event Meal Management
         </h2>

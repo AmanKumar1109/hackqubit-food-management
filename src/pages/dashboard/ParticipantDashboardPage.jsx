@@ -195,7 +195,7 @@ export const ParticipantDashboardPage = () => {
 
   const handleSignOut = async () => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const copySpecialId = () => {
@@ -327,16 +327,13 @@ export const ParticipantDashboardPage = () => {
       {/* ── Navbar ──────────────────────────────────────────────── */}
       <header className="participant-anim border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 sm:gap-3 flex-nowrap shrink-0">
-            <BrandLogo size="default" showText={true} theme="dark" />
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/90 text-amber-900 shadow-2xs whitespace-nowrap shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
-              <span className="font-cinzel text-[10px] sm:text-[11px] font-bold tracking-wider uppercase whitespace-nowrap">
-                <span className="hidden sm:inline">in collaboration with </span>
-                <span className="sm:hidden">collab with </span>
-                HackQubit 2.0
-              </span>
-            </div>
+          <div className="flex items-center shrink-0">
+            <BrandLogo
+              size="default"
+              showText={true}
+              theme="dark"
+              subtitle="in collaboration with HackQubit 2.0"
+            />
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2.5 pl-2 sm:pl-3">

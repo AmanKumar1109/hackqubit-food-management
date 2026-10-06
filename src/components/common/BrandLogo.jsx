@@ -2,14 +2,15 @@ import React from 'react';
 
 /**
  * Brand Logo component rendering the signature Arcana faceted geometric "A" and brand name.
- * Supports both modern 'horizontal' (default) and stacked 'vertical' layouts.
+ * Supports both modern 'horizontal' (default) and stacked 'vertical' layouts, plus an optional subtitle.
  */
 export const BrandLogo = ({
   size = 'default',
   showText = true,
   className = '',
   theme = 'dark',
-  layout = 'horizontal'
+  layout = 'horizontal',
+  subtitle = null
 }) => {
   const isLarge = size === 'large';
   const isDarkText = theme === 'dark';
@@ -60,15 +61,20 @@ export const BrandLogo = ({
       </svg>
 
       {showText && (
-        <span
-          className={`font-bold tracking-tight whitespace-nowrap ${
-            isVertical ? 'mt-1' : ''
-          } ${
-            isLarge ? 'text-lg' : 'text-sm sm:text-base'
-          } ${isDarkText ? 'text-neutral-900' : 'text-white'}`}
-        >
-          Arcana <span className="font-semibold text-neutral-500">Hackathon Deck</span>
-        </span>
+        <div className={`flex flex-col ${isVertical ? 'items-center text-center mt-1' : 'items-start justify-center'}`}>
+          <span
+            className={`font-bold tracking-tight whitespace-nowrap leading-tight ${
+              isLarge ? 'text-lg' : 'text-sm sm:text-base'
+            } ${isDarkText ? 'text-neutral-900' : 'text-white'}`}
+          >
+            Arcana <span className="font-semibold text-neutral-500">Hackathon Deck</span>
+          </span>
+          {subtitle && (
+            <span className="font-cinzel text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-amber-800 leading-tight mt-0.5">
+              {subtitle}
+            </span>
+          )}
+        </div>
       )}
     </div>
   );

@@ -50,15 +50,14 @@ export const ForgotPasswordForm = () => {
       ref={containerRef}
       className="w-full max-w-[420px] mx-auto flex flex-col justify-center py-6 px-4 sm:px-6"
     >
-      {/* Top Logo & Collaboration Badge */}
-      <div className="gsap-form-item flex flex-col items-start gap-2 mb-6">
-        <BrandLogo size="default" showText={true} theme="dark" />
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50/95 text-amber-900 border border-amber-200/90 shadow-2xs whitespace-nowrap">
-          <Sparkles size={12} className="text-amber-600 shrink-0" />
-          <span className="font-cinzel text-[10px] sm:text-[11px] font-bold tracking-wider uppercase whitespace-nowrap">
-            in collaboration with HackQubit 2.0
-          </span>
-        </div>
+      {/* Top Logo & Collaboration Subtitle */}
+      <div className="gsap-form-item flex flex-col items-start mb-6">
+        <BrandLogo
+          size="default"
+          showText={true}
+          theme="dark"
+          subtitle="in collaboration with HackQubit 2.0"
+        />
       </div>
 
       {!isSubmitted ? (
@@ -109,11 +108,11 @@ export const ForgotPasswordForm = () => {
 
             <div className="gsap-form-item pt-2">
               <Link
-                to="/login"
+                to="/admin-pannel-9234"
                 className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-neutral-700 hover:text-black transition-colors"
               >
                 <ArrowLeft size={16} />
-                <span>Back to sign in</span>
+                <span>Back to admin sign in</span>
               </Link>
             </div>
           </form>
@@ -128,10 +127,10 @@ export const ForgotPasswordForm = () => {
             We have sent password recovery instructions to <strong className="text-neutral-900">{email}</strong>.
           </p>
           <Link
-            to="/login"
+            to="/admin-pannel-9234"
             className="w-full mt-4 text-center bg-[#151619] hover:bg-black text-white text-sm font-semibold py-3.5 px-4 rounded-xl transition-all duration-200"
           >
-            Return to sign in
+            Return to admin sign in
           </Link>
         </div>
       )}

@@ -16,11 +16,11 @@ import BrandLogo from '../common/BrandLogo';
 import InputField from '../common/InputField';
 import { isValidEmail } from '../../utils/validation';
 
-export const LoginForm = () => {
+export const LoginForm = ({ mode = 'participant' }) => {
   const navigate = useNavigate();
   const { login, error } = useAuth();
 
-  const [loginType, setLoginType] = useState('management'); // 'management' | 'participant'
+  const [loginType, setLoginType] = useState(mode === 'admin' ? 'management' : 'participant');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -29,6 +29,13 @@ export const LoginForm = () => {
 
   const formContainerRef = useRef(null);
   const submitBtnRef = useRef(null);
+
+  useEffect(() => {
+    setLoginType(mode === 'admin' ? 'management' : 'participant');
+    setEmail('');
+    setPassword('');
+    setFieldErrors({});
+  }, [mode]);
 
   // GSAP entrance animation for all form items
   useEffect(() => {
@@ -50,12 +57,12 @@ export const LoginForm = () => {
     }, formContainerRef);
 
     return () => ctx.revert();
-  }, [loginType]);
+  }, [loginType, mode]);
 
   const validate = () => {
     const errors = {};
     if (!email.trim()) {
-      errors.email = loginType === 'management' ? 'Admin email is required' : 'Student email is required';
+      errors.email = loginType === 'management' ? 'Admin email is required' : 'Student registered email is required';
     } else if (!isValidEmail(email)) {
       errors.email = 'Please enter a valid email address';
     }
@@ -103,76 +110,116 @@ export const LoginForm = () => {
       ref={formContainerRef}
       className="w-full max-w-[440px] mx-auto flex flex-col justify-center py-4 px-4 sm:px-6"
     >
-      {/* Top Logo & HackQubit 2.0 Collaboration Badge */}
-      <div className="gsap-form-item flex flex-col items-start gap-2 mb-5 sm:mb-6">
-        <BrandLogo size="default" showText={true} theme="dark" />
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50/95 text-amber-900 border border-amber-200/90 shadow-2xs whitespace-nowrap">
-          <Sparkles size={12} className="text-amber-600 shrink-0" />
-          <span className="font-cinzel text-[10px] sm:text-[11px] font-bold tracking-wider uppercase whitespace-nowrap">
-            in collaboration with HackQubit 2.0
-          </span>
-        </div>
+      {/* Top Logo & Collaboration Subtitle */}
+      <div className="gsap-form-item flex flex-col items-start mb-4 sm:mb-5">
+        <BrandLogo
+          size="default"
+          showText={true}
+          theme="dark"
+          subtitle="in collaboration with HackQubit 2.0"
+        />
       </div>
 
-      {/* Main Title - Sign in */}
-      <div className="gsap-form-item mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
-          Sign in to Hackathon Deck
-        </h1>
-        <p className="text-xs text-neutral-500 mt-0.5">
-          Access your hackathon credentials, passes &amp; team portal
-        </p>
-      </div>
+      {/* Dynamic Portal Header depending on mode */}
+      {mode === 'admin' ? (
+        <>
+          <div className="gsap-form-item inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 text-white text-[10px] font-bold tracking-wider uppercase mb-2.5 self-start shadow-xs">
+            <ShieldCheck size={13} className="text-amber-400" />
+            <span>Operations &bull; Admin Console</span>
+          </div>
+          <div className="gsap-form-item mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
+              Admin Operations Sign In
+            </h1>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              Restricted management access for meal verification, live scanners &amp; sync
+            </p>
+          </div>
+        </>
+      ) : mode === 'participant' ? (
+        <>
+          <div className="gsap-form-item inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200/80 text-[10px] font-bold tracking-wider uppercase mb-2.5 self-start">
+            <GraduationCap size={13} className="text-blue-600" />
+            <span>Participant Food Pass Portal</span>
+          </div>
+          <div className="gsap-form-item mb-3">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
+              Participant Pass Sign In
+            </h1>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              Access your digital food tokens, dining schedule &amp; team WiFi credentials
+            </p>
+          </div>
 
-      {/* Dual Login Segmented Tabs: Management vs Participant */}
-      <div className="gsap-form-item mb-4 grid grid-cols-2 p-1 rounded-2xl bg-neutral-100 border border-neutral-200/80">
-        <button
-          type="button"
-          onClick={() => {
-            setLoginType('management');
-            setEmail('');
-            setPassword('');
-            setFieldErrors({});
-            if (setError) setError(null);
-          }}
-          className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            loginType === 'management'
-              ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/60'
-              : 'text-neutral-600 hover:text-neutral-900'
-          }`}
-        >
-          <ShieldCheck size={14} className={loginType === 'management' ? 'text-neutral-900' : 'text-neutral-500'} />
-          <span>Management</span>
-        </button>
+          {/* Participant Guidance Hint */}
+          <div className="gsap-form-item mb-4 p-2.5 rounded-xl bg-blue-50/70 border border-blue-200/80 text-[11px] text-blue-800 flex items-start gap-2">
+            <Info size={14} className="shrink-0 mt-0.5 text-blue-600" />
+            <span>
+              Enter your <strong>registered email address</strong> and your <strong>team leader's phone number</strong> as the password to access your meal pass.
+            </span>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="gsap-form-item mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
+              Sign in to Hackathon Deck
+            </h1>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              Access your hackathon credentials, passes &amp; team portal
+            </p>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setLoginType('participant');
-            setEmail('');
-            setPassword('');
-            setFieldErrors({});
-            if (setError) setError(null);
-          }}
-          className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            loginType === 'participant'
-              ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/60'
-              : 'text-neutral-600 hover:text-neutral-900'
-          }`}
-        >
-          <GraduationCap size={14} className={loginType === 'participant' ? 'text-neutral-900' : 'text-neutral-500'} />
-          <span>Participant</span>
-        </button>
-      </div>
+          {/* Dual Login Segmented Tabs: Management vs Participant */}
+          <div className="gsap-form-item mb-4 grid grid-cols-2 p-1 rounded-2xl bg-neutral-100 border border-neutral-200/80">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginType('management');
+                setEmail('');
+                setPassword('');
+                setFieldErrors({});
+                if (setError) setError(null);
+              }}
+              className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                loginType === 'management'
+                  ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/60'
+                  : 'text-neutral-600 hover:text-neutral-900'
+              }`}
+            >
+              <ShieldCheck size={14} className={loginType === 'management' ? 'text-neutral-900' : 'text-neutral-500'} />
+              <span>Management</span>
+            </button>
 
-      {/* Participant Guidance Hint */}
-      {loginType === 'participant' && (
-        <div className="gsap-form-item mb-4 p-2.5 rounded-xl bg-blue-50/70 border border-blue-200/80 text-[11px] text-blue-800 flex items-start gap-2">
-          <Info size={14} className="shrink-0 mt-0.5 text-blue-600" />
-          <span>
-            Enter your <strong>registered email address</strong> and your <strong>team leader's phone number</strong> as the password to access your meal pass.
-          </span>
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginType('participant');
+                setEmail('');
+                setPassword('');
+                setFieldErrors({});
+                if (setError) setError(null);
+              }}
+              className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                loginType === 'participant'
+                  ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/60'
+                  : 'text-neutral-600 hover:text-neutral-900'
+              }`}
+            >
+              <GraduationCap size={14} className={loginType === 'participant' ? 'text-neutral-900' : 'text-neutral-500'} />
+              <span>Participant</span>
+            </button>
+          </div>
+
+          {loginType === 'participant' && (
+            <div className="gsap-form-item mb-4 p-2.5 rounded-xl bg-blue-50/70 border border-blue-200/80 text-[11px] text-blue-800 flex items-start gap-2">
+              <Info size={14} className="shrink-0 mt-0.5 text-blue-600" />
+              <span>
+                Enter your <strong>registered email address</strong> and your <strong>team leader's phone number</strong> as the password to access your meal pass.
+              </span>
+            </div>
+          )}
+        </>
       )}
 
       {/* Global Error Banner */}
@@ -252,20 +299,33 @@ export const LoginForm = () => {
               </>
             ) : (
               <span>
-                {loginType === 'management' ? 'Sign In as Management' : 'Sign In as Participant'}
+                {loginType === 'management' ? 'Sign In to Admin Console' : 'Access Participant Food Pass'}
               </span>
             )}
           </button>
         </div>
 
-        {/* Navigation Links */}
+        {/* Navigation / Assistance Note */}
         <div className="gsap-form-item flex flex-col gap-1 pt-1 text-xs sm:text-[13px]">
-          <Link
-            to="/forgot-password"
-            className="text-neutral-500 hover:text-neutral-900 transition-colors w-fit"
-          >
-            Forgot Password?
-          </Link>
+          {mode === 'admin' ? (
+            <Link
+              to="/forgot-password"
+              className="text-neutral-500 hover:text-neutral-900 transition-colors w-fit"
+            >
+              Forgot Password?
+            </Link>
+          ) : mode === 'participant' ? (
+            <p className="text-neutral-400 text-xs leading-relaxed">
+              Facing issue logging in? Please re-check with your team leader for the exact registered email and phone number.
+            </p>
+          ) : (
+            <Link
+              to="/forgot-password"
+              className="text-neutral-500 hover:text-neutral-900 transition-colors w-fit"
+            >
+              Forgot Password?
+            </Link>
+          )}
         </div>
       </form>
     </div>

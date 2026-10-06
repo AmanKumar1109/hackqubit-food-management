@@ -13,7 +13,7 @@ export const NotFoundPage = () => {
           The page you are looking for doesn't exist or has been moved.
         </p>
         <Link
-          to="/login"
+          to="/"
           className="mt-2 w-full py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold transition-all"
         >
           Return to Sign In

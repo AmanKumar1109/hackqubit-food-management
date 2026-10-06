@@ -2,10 +2,10 @@ import React from 'react';
 import AuthLayout from '../../components/layout/AuthLayout';
 import LoginForm from '../../components/auth/LoginForm';
 
-export const LoginPage = () => {
+export const LoginPage = ({ mode = 'participant' }) => {
   return (
     <AuthLayout>
-      <LoginForm />
+      <LoginForm mode={mode} />
     </AuthLayout>
   );
 };

@@ -14,7 +14,7 @@ export const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Root redirect: if authenticated go to respective dashboard, otherwise login */}
+      {/* Root Route: Shows strictly Participant Login Form (or redirects if already logged in) */}
       <Route
         path="/"
         element={
@@ -25,13 +25,32 @@ export const AppRoutes = () => {
               <Navigate to="/dashboard" replace />
             )
           ) : (
-            <Navigate to="/login" replace />
+            <LoginPage mode="participant" />
           )
         }
       />
 
-      {/* Public Auth Routes */}
-      <Route path="/login" element={<LoginPage />} />
+      {/* /login aliases to root participant portal */}
+      <Route path="/login" element={<Navigate to="/" replace />} />
+
+      {/* Dedicated Admin Portal Route (/admin-pannel-9234) */}
+      <Route
+        path="/admin-pannel-9234"
+        element={
+          isAuthenticated && role === 'admin' ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <LoginPage mode="admin" />
+          )
+        }
+      />
+      {/* Single-n typo alias */}
+      <Route
+        path="/admin-panel-9234"
+        element={<Navigate to="/admin-pannel-9234" replace />}
+      />
+
+      {/* Public Auth Helpers */}
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
@@ -39,7 +58,7 @@ export const AppRoutes = () => {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <DashboardPage />
           </ProtectedRoute>
         }
@@ -49,7 +68,7 @@ export const AppRoutes = () => {
       <Route
         path="/participant-dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="participant">
             <ParticipantDashboardPage />
           </ProtectedRoute>
         }
@@ -62,4 +81,3 @@ export const AppRoutes = () => {
 };
 
 export default AppRoutes;
-
